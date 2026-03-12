@@ -42,3 +42,15 @@ div[role="presentation"] > div > div > div > div.css-175oi2r.r-1adg3ll.r-bztko3.
         transform: translateX(-50%) translateY(-4px) rotate(2deg);
     }
 }
+
+/* 初始戴上时的弹出动画 */
+@keyframes lobster-pop {
+    0% {
+        transform: translateX(-50%) scale(0) rotate(-20deg);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(-50%) scale(1) rotate(0deg);
+        opacity: 1;
+    }
+}

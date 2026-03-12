@@ -50,6 +50,9 @@ function wearHat(avatarElement, count, isTop1 = false) {
         svg.style.filter = 'drop-shadow(0px 0px 5px rgba(255, 215, 0, 0.8)) drop-shadow(0px 3px 2px rgba(0,0,0,0.3))';
     }
     
+    // 增加一个“戴帽”瞬间的 Pop 动画
+    container.style.animation = 'lobster-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), lobster-float 3s ease-in-out infinite';
+    
     avatarElement.style.position = 'relative';
     avatarElement.appendChild(container);
 }

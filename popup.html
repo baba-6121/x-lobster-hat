@@ -14,16 +14,22 @@
             0%, 100% { transform: rotate(-5deg); }
             50% { transform: rotate(5deg); }
         }
-        .user-link { color: #1d9bf0; text-decoration: none; font-size: 14px; }
+        .user-link { color: #1d9bf0; text-decoration: none; font-size: 14px; cursor: pointer; }
+        .user-link:hover { text-decoration: underline; }
         .lobster-count { color: #ff4500; font-weight: bold; }
-        button { background: #0f1419; color: white; border: none; padding: 8px; border-radius: 999px; cursor: pointer; width: 100%; font-weight: bold; transition: opacity 0.2s; }
+        .footer { display: flex; gap: 8px; margin-top: 12px; }
+        button { background: #0f1419; color: white; border: none; padding: 8px; border-radius: 999px; cursor: pointer; width: 100%; font-weight: bold; transition: opacity 0.2s; font-size: 13px; }
+        button#share { background: #1d9bf0; }
         button:hover { opacity: 0.8; }
     </style>
 </head>
 <body>
     <h3>🦞 Lobster Leaderboard</h3>
     <div class="stats-container" id="stats">Loading...</div>
-    <button id="clear">Reset All Lobsters</button>
+    <div class="footer">
+        <button id="share">Share King 👑</button>
+        <button id="clear">Reset</button>
+    </div>
     <script src="popup.js"></script>
 </body>
 </html>
