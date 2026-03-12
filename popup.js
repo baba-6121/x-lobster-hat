@@ -3,9 +3,14 @@ document.getElementById('highlightToggle').onchange = (e) => {
     chrome.storage.local.set({ highlightEnabled: e.target.checked });
 };
 
+document.getElementById('badgeToggle').onchange = (e) => {
+    chrome.storage.local.set({ badgeEnabled: e.target.checked });
+};
+
 // 初始化开关状态
-chrome.storage.local.get('highlightEnabled', (data) => {
+chrome.storage.local.get(['highlightEnabled', 'badgeEnabled'], (data) => {
     document.getElementById('highlightToggle').checked = data.highlightEnabled !== false;
+    document.getElementById('badgeToggle').checked = data.badgeEnabled !== false;
 });
 
 async function updateStats() {

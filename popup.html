@@ -27,9 +27,14 @@
     <h3>🦞 Lobster Leaderboard</h3>
     <div class="stats-container" id="stats">Loading...</div>
     <div class="footer">
-        <label style="font-size: 12px; display: flex; align-items: center; cursor: pointer;">
-            <input type="checkbox" id="highlightToggle" checked> Highlight Key
-        </label>
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+            <label style="font-size: 11px; display: flex; align-items: center; cursor: pointer;">
+                <input type="checkbox" id="highlightToggle" checked> Highlight Key
+            </label>
+            <label style="font-size: 11px; display: flex; align-items: center; cursor: pointer;">
+                <input type="checkbox" id="badgeToggle" checked> Show Badge
+            </label>
+        </div>
         <button id="share">Share King 👑</button>
         <button id="clear">Reset</button>
     </div>

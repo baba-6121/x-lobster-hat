@@ -140,10 +140,10 @@ async function scanTweets() {
     });
 
     // 更新图标 Badge (显示当前页面戴帽子的人数)
-    if (foundLobstersCount > 0) {
-        // 注：由于 content script 无法直接调用 action.setBadgeText，需要后台脚本配合或省略
-        // 暂时省略或通过 runtime.sendMessage 传给 background.js
-    }
+    chrome.runtime.sendMessage({ 
+        action: "updateBadge", 
+        count: foundLobstersCount 
+    });
 
     // 2. 处理个人主页大头像 (Profile)
     // ... 保持原有逻辑 ...
