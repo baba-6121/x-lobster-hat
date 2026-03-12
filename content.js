@@ -46,19 +46,24 @@ async function scanTweets() {
         const textNode = tweet.querySelector('[data-testid="tweetText"]');
         const avatarNode = tweet.querySelector('[data-testid="Tweet-User-Avatar"]');
         
-        if (textNode && avatarNode && textNode.innerText.toLowerCase().includes('openclaw')) {
+        if (avatarNode) {
             const userLink = tweet.querySelector('a[role="link"][href^="/"]');
             if (userLink) {
                 const username = userLink.getAttribute('href').replace('/', '');
                 
-                // 标记已处理，避免重复计数（简化版：当前 session 计数）
-                if (!tweet.dataset.lobsterProcessed) {
-                    counts[username] = (counts[username] || 0) + 1;
-                    tweet.dataset.lobsterProcessed = "true";
-                    chrome.storage.local.set({ counts });
+                // 1. 如果当前推文包含关键词，进行计数逻辑
+                if (textNode && textNode.innerText.toLowerCase().includes('openclaw')) {
+                    if (!tweet.dataset.lobsterProcessed) {
+                        counts[username] = (counts[username] || 0) + 1;
+                        tweet.dataset.lobsterProcessed = "true";
+                        chrome.storage.local.set({ counts });
+                    }
                 }
-                
-                wearHat(avatarNode, counts[username]);
+
+                // 2. 只要该用户在历史记录中有计数，就显示帽子
+                if (counts[username] > 0) {
+                    wearHat(avatarNode, counts[username]);
+                }
             }
         }
     });
