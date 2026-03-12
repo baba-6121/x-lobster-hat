@@ -7,7 +7,7 @@
     width: 100%; /* 缩小一点，显得更像帽子 */
     height: 60%;
     pointer-events: none;
-    z-index: 10;
+    z-index: 999999 !important; /* 极致置顶，防止被 X 的其他层级遮挡 */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -20,13 +20,16 @@
     filter: drop-shadow(0px 3px 2px rgba(0,0,0,0.3));
 }
 
-/* 兼容个人主页大头像，由于 X 的头像容器通常有 overflow: hidden，
-   我们需要确保帽子不会被切断，有时需要找到更高级别的容器或者调整 clip 属性 */
-[data-testid^="UserAvatar-Container"] {
+/* 强制所有可能的头像父容器不要切断帽子 */
+[data-testid^="UserAvatar-Container"],
+[data-testid="Tweet-User-Avatar"],
+div[role="presentation"] > div > div > div > div.css-175oi2r.r-1adg3ll.r-bztko3.r-16y2uox.r-1wbh5a2.r-1ny4l3l,
+.css-175oi2r.r-sdz70u {
     overflow: visible !important;
 }
 
-[data-testid="Tweet-User-Avatar"] {
+/* 针对 X 的某些复杂层级，确保父级也不裁剪 */
+.r-1adg3ll {
     overflow: visible !important;
 }
 
