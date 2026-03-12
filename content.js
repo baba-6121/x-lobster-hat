@@ -45,18 +45,18 @@ function wearHat(avatarElement, count) {
 
 // 扫描推文
 async function scanTweets() {
+    // 扫描所有可能的推文容器
     const tweets = document.querySelectorAll('article[data-testid="tweet"]');
     const storage = await chrome.storage.local.get(['counts', 'processedTweets']);
     const counts = storage.counts || {};
-    const processedTweets = storage.processedTweets || []; // 存储已统计过的推文 ID
+    const processedTweets = storage.processedTweets || [];
 
     let updated = false;
 
+    // 1. 处理推文中的头像 (Timeline)
     tweets.forEach(tweet => {
         const textNode = tweet.querySelector('[data-testid="tweetText"]');
         const avatarNode = tweet.querySelector('[data-testid="Tweet-User-Avatar"]');
-        
-        // 尝试获取推文唯一 ID (通常在时间的链接里)
         const timeLink = tweet.querySelector('time')?.parentElement;
         const tweetId = timeLink?.getAttribute('href')?.split('/').pop();
 
@@ -64,23 +64,33 @@ async function scanTweets() {
             const userLink = tweet.querySelector('a[role="link"][href^="/"]');
             if (userLink) {
                 const username = userLink.getAttribute('href').replace('/', '');
-                
-                // 1. 如果当前推文包含关键词，且该推文 ID 没被处理过
                 if (tweetId && textNode && textNode.innerText.toLowerCase().includes('openclaw')) {
                     if (!processedTweets.includes(tweetId)) {
                         counts[username] = (counts[username] || 0) + 1;
                         processedTweets.push(tweetId);
-                        // 保持记录不要无限膨胀，只保留最近 1000 条
                         if (processedTweets.length > 1000) processedTweets.shift();
                         updated = true;
                     }
                 }
-
-                // 2. 只要该用户在历史记录中有计数，就显示帽子
-                if (counts[username] > 0) {
-                    wearHat(avatarNode, counts[username]);
-                }
+                if (counts[username] > 0) wearHat(avatarNode, counts[username]);
             }
+        }
+    });
+
+    // 2. 处理个人主页大头像 (Profile)
+    const profileAvatar = document.querySelector('[data-testid="UserProfileHeader_Items"]')?.parentElement?.querySelector('[data-testid^="UserAvatar-Container"]');
+    if (profileAvatar) {
+        const username = window.location.pathname.replace('/', '');
+        if (counts[username] > 0) wearHat(profileAvatar, counts[username]);
+    }
+
+    // 3. 处理侧边栏头像 (Sidebar / Who to follow)
+    const sidebarAvatars = document.querySelectorAll('[data-testid="UserCell"] [data-testid^="UserAvatar-Container"]');
+    sidebarAvatars.forEach(avatar => {
+        const userLink = avatar.closest('[data-testid="UserCell"]')?.querySelector('a[role="link"]');
+        if (userLink) {
+            const username = userLink.getAttribute('href').replace('/', '');
+            if (counts[username] > 0) wearHat(avatar, counts[username]);
         }
     });
 

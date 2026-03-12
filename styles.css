@@ -20,6 +20,16 @@
     filter: drop-shadow(0px 3px 2px rgba(0,0,0,0.3));
 }
 
+/* 兼容个人主页大头像，由于 X 的头像容器通常有 overflow: hidden，
+   我们需要确保帽子不会被切断，有时需要找到更高级别的容器或者调整 clip 属性 */
+[data-testid^="UserAvatar-Container"] {
+    overflow: visible !important;
+}
+
+[data-testid="Tweet-User-Avatar"] {
+    overflow: visible !important;
+}
+
 /* 浮动动画，增加灵动感 */
 @keyframes lobster-float {
     0%, 100% {
