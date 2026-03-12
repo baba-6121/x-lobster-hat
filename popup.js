@@ -15,7 +15,7 @@ async function updateStats() {
 }
 
 document.getElementById('clear').onclick = async () => {
-    await chrome.storage.local.set({ counts: {} });
+    await chrome.storage.local.set({ counts: {}, processedTweets: [] });
     updateStats();
 };
 

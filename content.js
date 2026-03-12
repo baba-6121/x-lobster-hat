@@ -39,24 +39,33 @@ function wearHat(avatarElement, count) {
 // 扫描推文
 async function scanTweets() {
     const tweets = document.querySelectorAll('article[data-testid="tweet"]');
-    const storage = await chrome.storage.local.get('counts') || { counts: {} };
+    const storage = await chrome.storage.local.get(['counts', 'processedTweets']);
     const counts = storage.counts || {};
+    const processedTweets = storage.processedTweets || []; // 存储已统计过的推文 ID
+
+    let updated = false;
 
     tweets.forEach(tweet => {
         const textNode = tweet.querySelector('[data-testid="tweetText"]');
         const avatarNode = tweet.querySelector('[data-testid="Tweet-User-Avatar"]');
         
+        // 尝试获取推文唯一 ID (通常在时间的链接里)
+        const timeLink = tweet.querySelector('time')?.parentElement;
+        const tweetId = timeLink?.getAttribute('href')?.split('/').pop();
+
         if (avatarNode) {
             const userLink = tweet.querySelector('a[role="link"][href^="/"]');
             if (userLink) {
                 const username = userLink.getAttribute('href').replace('/', '');
                 
-                // 1. 如果当前推文包含关键词，进行计数逻辑
-                if (textNode && textNode.innerText.toLowerCase().includes('openclaw')) {
-                    if (!tweet.dataset.lobsterProcessed) {
+                // 1. 如果当前推文包含关键词，且该推文 ID 没被处理过
+                if (tweetId && textNode && textNode.innerText.toLowerCase().includes('openclaw')) {
+                    if (!processedTweets.includes(tweetId)) {
                         counts[username] = (counts[username] || 0) + 1;
-                        tweet.dataset.lobsterProcessed = "true";
-                        chrome.storage.local.set({ counts });
+                        processedTweets.push(tweetId);
+                        // 保持记录不要无限膨胀，只保留最近 1000 条
+                        if (processedTweets.length > 1000) processedTweets.shift();
+                        updated = true;
                     }
                 }
 
@@ -67,7 +76,19 @@ async function scanTweets() {
             }
         }
     });
+
+    if (updated) {
+        chrome.storage.local.set({ counts, processedTweets });
+    }
 }
+
+// 监听存储变化（如点击清除按钮）
+chrome.storage.onChanged.addListener((changes) => {
+    if (changes.counts && Object.keys(changes.counts.newValue).length === 0) {
+        // 清除所有帽子
+        document.querySelectorAll('.lobster-hat-container').forEach(el => el.remove());
+    }
+});
 
 // 监听动态加载
 const observer = new MutationObserver(() => {
