@@ -1,20 +1,31 @@
 /* 龙虾帽容器 */
 .lobster-hat-container {
     position: absolute;
-    top: -12px;
+    top: -18px; /* 稍微调高一点，避免压到眼睛 */
     left: 50%;
     transform: translateX(-50%);
-    width: 120%;
+    width: 100%; /* 缩小一点，显得更像帽子 */
     height: 60%;
     pointer-events: none;
     z-index: 10;
     display: flex;
     justify-content: center;
     align-items: center;
+    animation: lobster-float 3s ease-in-out infinite;
 }
 
 .lobster-hat-svg {
     width: 100%;
     height: 100%;
-    filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.2));
+    filter: drop-shadow(0px 3px 2px rgba(0,0,0,0.3));
+}
+
+/* 浮动动画，增加灵动感 */
+@keyframes lobster-float {
+    0%, 100% {
+        transform: translateX(-50%) translateY(0) rotate(-2deg);
+    }
+    50% {
+        transform: translateX(-50%) translateY(-4px) rotate(2deg);
+    }
 }

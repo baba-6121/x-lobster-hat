@@ -1,11 +1,18 @@
 const LOBSTER_SVG = `
 <svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg" class="lobster-hat-svg">
-    <!-- 简易龙虾帽 SVG 路径 -->
-    <path d="M20,40 Q50,10 80,40 L75,45 Q50,20 25,45 Z" fill="currentColor" />
-    <circle cx="35" cy="30" r="3" fill="black" />
-    <circle cx="65" cy="30" r="3" fill="black" />
-    <path d="M10,35 Q5,25 15,20 T25,25" fill="none" stroke="currentColor" stroke-width="2" />
-    <path d="M90,35 Q95,25 85,20 T75,25" fill="none" stroke="currentColor" stroke-width="2" />
+    <!-- 龙虾身体/帽子主体 -->
+    <path d="M20,45 Q50,5 80,45 Q50,35 20,45" fill="currentColor" />
+    <!-- 两个大钳子 -->
+    <path d="M15,35 Q-5,20 10,15 Q15,25 20,35" fill="currentColor" />
+    <path d="M85,35 Q105,20 90,15 Q85,25 80,35" fill="currentColor" />
+    <!-- 触角 -->
+    <path d="M40,15 Q35,0 25,5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+    <path d="M60,15 Q65,0 75,5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+    <!-- 眼睛 -->
+    <circle cx="42" cy="25" r="3" fill="white" />
+    <circle cx="42" cy="25" r="1.5" fill="black" />
+    <circle cx="58" cy="25" r="3" fill="white" />
+    <circle cx="58" cy="25" r="1.5" fill="black" />
 </svg>
 `;
 
