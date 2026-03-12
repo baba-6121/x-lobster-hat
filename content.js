@@ -83,15 +83,17 @@ function wearHat(avatarElement, count, isTop1 = false) {
 async function scanTweets() {
     // 扫描所有可能的推文容器
     const tweets = document.querySelectorAll('article[data-testid="tweet"]');
-    const storage = await chrome.storage.local.get(['counts', 'processedTweets']);
+    const storage = await chrome.storage.local.get(['counts', 'processedTweets', 'highlightEnabled']);
     const counts = storage.counts || {};
     const processedTweets = storage.processedTweets || [];
+    const highlightEnabled = storage.highlightEnabled !== false;
 
     // 找出当前的 Top 1 玩家
     const sortedUsers = Object.entries(counts).sort((a, b) => b[1] - a[1]);
     const top1User = sortedUsers.length > 0 ? sortedUsers[0][0] : null;
 
     let updated = false;
+    let foundLobstersCount = 0;
 
     // 1. 处理推文中的头像 (Timeline)
     tweets.forEach(tweet => {
@@ -105,22 +107,46 @@ async function scanTweets() {
             if (userLink) {
                 const username = userLink.getAttribute('href').replace('/', '');
                 const keywordRegex = /\bopenclaw\b/i;
-                if (tweetId && textNode && keywordRegex.test(textNode.innerText)) {
-                    if (!processedTweets.includes(tweetId)) {
+                
+                if (textNode && keywordRegex.test(textNode.innerText)) {
+                    // 计数逻辑
+                    if (tweetId && !processedTweets.includes(tweetId)) {
                         counts[username] = (counts[username] || 0) + 1;
                         processedTweets.push(tweetId);
                         if (processedTweets.length > 1000) processedTweets.shift();
                         updated = true;
                     }
+
+                    // 高亮逻辑
+                    if (highlightEnabled && !textNode.querySelector('.lobster-highlight')) {
+                        const originalHTML = textNode.innerHTML;
+                        // 简单的替换逻辑，保留大小写
+                        const newHTML = originalHTML.replace(
+                            new RegExp('(\\bopenclaw\\b)', 'gi'),
+                            '<span class="lobster-highlight">$1</span>'
+                        );
+                        if (newHTML !== originalHTML) {
+                            textNode.innerHTML = newHTML;
+                        }
+                    }
                 }
+
                 if (counts[username] > 0) {
+                    foundLobstersCount++;
                     wearHat(avatarNode, counts[username], username === top1User);
                 }
             }
         }
     });
 
+    // 更新图标 Badge (显示当前页面戴帽子的人数)
+    if (foundLobstersCount > 0) {
+        // 注：由于 content script 无法直接调用 action.setBadgeText，需要后台脚本配合或省略
+        // 暂时省略或通过 runtime.sendMessage 传给 background.js
+    }
+
     // 2. 处理个人主页大头像 (Profile)
+    // ... 保持原有逻辑 ...
     const profileAvatar = document.querySelector('[data-testid="UserProfileHeader_Items"]')?.parentElement?.querySelector('[data-testid^="UserAvatar-Container"]');
     if (profileAvatar) {
         const username = window.location.pathname.replace('/', '');

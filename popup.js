@@ -1,3 +1,13 @@
+// 监听开关变化
+document.getElementById('highlightToggle').onchange = (e) => {
+    chrome.storage.local.set({ highlightEnabled: e.target.checked });
+};
+
+// 初始化开关状态
+chrome.storage.local.get('highlightEnabled', (data) => {
+    document.getElementById('highlightToggle').checked = data.highlightEnabled !== false;
+});
+
 async function updateStats() {
     const storage = await chrome.storage.local.get('counts');
     const counts = storage.counts || {};
