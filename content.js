@@ -25,10 +25,18 @@ function getLobsterColor(count) {
 }
 
 // 给头像戴帽子
-function wearHat(avatarElement, count) {
+function wearHat(avatarElement, count, isTop1 = false) {
     if (avatarElement.querySelector('.lobster-hat-container')) {
         const existingHat = avatarElement.querySelector('.lobster-hat-svg');
-        if (existingHat) existingHat.style.color = getLobsterColor(count);
+        if (existingHat) {
+            existingHat.style.color = getLobsterColor(count);
+            // 给 Top 1 增加发光效果
+            if (isTop1) {
+                existingHat.style.filter = 'drop-shadow(0px 0px 5px rgba(255, 215, 0, 0.8)) drop-shadow(0px 3px 2px rgba(0,0,0,0.3))';
+            } else {
+                existingHat.style.filter = 'drop-shadow(0px 3px 2px rgba(0,0,0,0.3))';
+            }
+        }
         return;
     }
 
@@ -38,6 +46,9 @@ function wearHat(avatarElement, count) {
     
     const svg = container.querySelector('svg');
     svg.style.color = getLobsterColor(count);
+    if (isTop1) {
+        svg.style.filter = 'drop-shadow(0px 0px 5px rgba(255, 215, 0, 0.8)) drop-shadow(0px 3px 2px rgba(0,0,0,0.3))';
+    }
     
     avatarElement.style.position = 'relative';
     avatarElement.appendChild(container);
@@ -50,6 +61,10 @@ async function scanTweets() {
     const storage = await chrome.storage.local.get(['counts', 'processedTweets']);
     const counts = storage.counts || {};
     const processedTweets = storage.processedTweets || [];
+
+    // 找出当前的 Top 1 玩家
+    const sortedUsers = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    const top1User = sortedUsers.length > 0 ? sortedUsers[0][0] : null;
 
     let updated = false;
 
@@ -72,7 +87,9 @@ async function scanTweets() {
                         updated = true;
                     }
                 }
-                if (counts[username] > 0) wearHat(avatarNode, counts[username]);
+                if (counts[username] > 0) {
+                    wearHat(avatarNode, counts[username], username === top1User);
+                }
             }
         }
     });
@@ -81,7 +98,7 @@ async function scanTweets() {
     const profileAvatar = document.querySelector('[data-testid="UserProfileHeader_Items"]')?.parentElement?.querySelector('[data-testid^="UserAvatar-Container"]');
     if (profileAvatar) {
         const username = window.location.pathname.replace('/', '');
-        if (counts[username] > 0) wearHat(profileAvatar, counts[username]);
+        if (counts[username] > 0) wearHat(profileAvatar, counts[username], username === top1User);
     }
 
     // 3. 处理侧边栏头像 (Sidebar / Who to follow)
@@ -90,7 +107,7 @@ async function scanTweets() {
         const userLink = avatar.closest('[data-testid="UserCell"]')?.querySelector('a[role="link"]');
         if (userLink) {
             const username = userLink.getAttribute('href').replace('/', '');
-            if (counts[username] > 0) wearHat(avatar, counts[username]);
+            if (counts[username] > 0) wearHat(avatar, counts[username], username === top1User);
         }
     });
 

@@ -10,7 +10,15 @@ async function updateStats() {
 
     statsDiv.innerHTML = Object.entries(counts)
         .sort((a, b) => b[1] - a[1])
-        .map(([user, count]) => `<div class="count-item"><span>@${user}</span> <span>${count} 🦞</span></div>`)
+        .map(([user, count], index) => {
+            const isTop1 = index === 0;
+            return `
+                <div class="count-item ${isTop1 ? 'top-1' : ''}">
+                    <span class="user-link">${isTop1 ? '<span class="crown">👑</span>' : ''}@${user}</span>
+                    <span class="lobster-count">${count} 🦞</span>
+                </div>
+            `;
+        })
         .join('');
 }
 
