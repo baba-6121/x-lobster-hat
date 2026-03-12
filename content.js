@@ -18,6 +18,10 @@ const LOBSTER_SVG = `
 
 // 辅助函数：根据频次获取颜色
 function getLobsterColor(count) {
+    // 基础颜色映射逻辑
+    if (count >= 100) return 'hsl(280, 100%, 50%)'; // 100+ 次：霓虹紫色 (神话级)
+    if (count >= 50) return 'hsl(200, 100%, 50%)';  // 50+ 次：赛博蓝色 (传说级)
+    
     const minLightness = 30; // 最深 (深红)
     const maxLightness = 60; // 最浅 (亮粉红)
     const lightness = Math.max(minLightness, maxLightness - (count * 5));
@@ -30,12 +34,21 @@ function wearHat(avatarElement, count, isTop1 = false) {
         const existingHat = avatarElement.querySelector('.lobster-hat-svg');
         if (existingHat) {
             existingHat.style.color = getLobsterColor(count);
-            // 给 Top 1 增加发光效果
+            
+            // 特效叠加逻辑
+            let filters = ['drop-shadow(0px 3px 2px rgba(0,0,0,0.3))'];
+            
             if (isTop1) {
-                existingHat.style.filter = 'drop-shadow(0px 0px 5px rgba(255, 215, 0, 0.8)) drop-shadow(0px 3px 2px rgba(0,0,0,0.3))';
-            } else {
-                existingHat.style.filter = 'drop-shadow(0px 3px 2px rgba(0,0,0,0.3))';
+                filters.push('drop-shadow(0px 0px 8px rgba(255, 215, 0, 0.9))');
             }
+            
+            if (count >= 100) {
+                avatarElement.classList.add('lobster-mythic-glow');
+            } else if (count >= 50) {
+                avatarElement.classList.add('lobster-legend-glow');
+            }
+            
+            existingHat.style.filter = filters.join(' ');
         }
         return;
     }
@@ -46,8 +59,17 @@ function wearHat(avatarElement, count, isTop1 = false) {
     
     const svg = container.querySelector('svg');
     svg.style.color = getLobsterColor(count);
+    
+    let filters = ['drop-shadow(0px 3px 2px rgba(0,0,0,0.3))'];
     if (isTop1) {
-        svg.style.filter = 'drop-shadow(0px 0px 5px rgba(255, 215, 0, 0.8)) drop-shadow(0px 3px 2px rgba(0,0,0,0.3))';
+        filters.push('drop-shadow(0px 0px 8px rgba(255, 215, 0, 0.9))');
+    }
+    svg.style.filter = filters.join(' ');
+    
+    if (count >= 100) {
+        avatarElement.classList.add('lobster-mythic-glow');
+    } else if (count >= 50) {
+        avatarElement.classList.add('lobster-legend-glow');
     }
     
     // 增加一个“戴帽”瞬间的 Pop 动画
@@ -82,7 +104,8 @@ async function scanTweets() {
             const userLink = tweet.querySelector('a[role="link"][href^="/"]');
             if (userLink) {
                 const username = userLink.getAttribute('href').replace('/', '');
-                if (tweetId && textNode && textNode.innerText.toLowerCase().includes('openclaw')) {
+                const keywordRegex = /\bopenclaw\b/i;
+                if (tweetId && textNode && keywordRegex.test(textNode.innerText)) {
                     if (!processedTweets.includes(tweetId)) {
                         counts[username] = (counts[username] || 0) + 1;
                         processedTweets.push(tweetId);

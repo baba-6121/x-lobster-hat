@@ -54,3 +54,22 @@ div[role="presentation"] > div > div > div > div.css-175oi2r.r-1adg3ll.r-bztko3.
         opacity: 1;
     }
 }
+
+/* 高级特效：传说级发光 (50+) */
+.lobster-legend-glow {
+    box-shadow: 0 0 15px rgba(0, 191, 255, 0.6) !important;
+    border: 2px solid rgba(0, 191, 255, 0.8) !important;
+    transition: all 0.3s ease;
+}
+
+/* 高级特效：神话级发光 (100+) */
+.lobster-mythic-glow {
+    box-shadow: 0 0 20px rgba(138, 43, 226, 0.7) !important;
+    border: 2px solid rgba(138, 43, 226, 0.9) !important;
+    animation: mythic-pulse 2s infinite alternate;
+}
+
+@keyframes mythic-pulse {
+    from { box-shadow: 0 0 10px rgba(138, 43, 226, 0.5); }
+    to { box-shadow: 0 0 25px rgba(138, 43, 226, 0.9); }
+}
