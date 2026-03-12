@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        body { width: 220px; padding: 12px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f7f9f9; }
+        body { width: 240px; padding: 12px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f7f9f9; }
         h3 { margin-top: 0; color: #0f1419; font-size: 18px; border-bottom: 2px solid #ff4500; padding-bottom: 5px; }
-        .stats-container { max-height: 300px; overflow-y: auto; margin: 10px 0; background: white; border-radius: 8px; border: 1px solid #eff3f4; }
+        .stats-container { max-height: 200px; overflow-y: auto; margin: 10px 0; background: white; border-radius: 8px; border: 1px solid #eff3f4; }
         .count-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid #eff3f4; }
         .count-item:last-child { border-bottom: none; }
         .count-item.top-1 { background: #fff5f5; font-weight: bold; }
@@ -17,26 +17,48 @@
         .user-link { color: #1d9bf0; text-decoration: none; font-size: 14px; cursor: pointer; }
         .user-link:hover { text-decoration: underline; }
         .lobster-count { color: #ff4500; font-weight: bold; }
-        .footer { display: flex; gap: 8px; margin-top: 12px; }
+        
+        .settings-panel { background: white; padding: 10px; border-radius: 8px; border: 1px solid #eff3f4; margin-bottom: 10px; font-size: 12px; }
+        .setting-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .setting-row:last-child { margin-bottom: 0; }
+        
+        .footer { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+        .button-group { display: flex; gap: 8px; }
         button { background: #0f1419; color: white; border: none; padding: 8px; border-radius: 999px; cursor: pointer; width: 100%; font-weight: bold; transition: opacity 0.2s; font-size: 13px; }
         button#share { background: #1d9bf0; }
         button:hover { opacity: 0.8; }
+        input[type="color"] { border: none; width: 30px; height: 20px; cursor: pointer; background: none; }
     </style>
 </head>
 <body>
     <h3>🦞 Lobster Leaderboard</h3>
     <div class="stats-container" id="stats">Loading...</div>
-    <div class="footer">
-        <div style="display: flex; flex-direction: column; gap: 4px;">
-            <label style="font-size: 11px; display: flex; align-items: center; cursor: pointer;">
-                <input type="checkbox" id="highlightToggle" checked> Highlight Key
-            </label>
-            <label style="font-size: 11px; display: flex; align-items: center; cursor: pointer;">
-                <input type="checkbox" id="badgeToggle" checked> Show Badge
-            </label>
+    
+    <div class="settings-panel">
+        <div class="setting-row">
+            <span>Hat Base Color</span>
+            <input type="color" id="baseColor" value="#ff4500">
         </div>
-        <button id="share">Share King 👑</button>
-        <button id="clear">Reset</button>
+        <div class="setting-row">
+            <label style="cursor: pointer;"><input type="checkbox" id="showCountToggle" checked> Show Count on Hat</label>
+        </div>
+        <div class="setting-row">
+            <label style="cursor: pointer;"><input type="checkbox" id="highlightToggle" checked> Highlight Key</label>
+        </div>
+        <div class="setting-row">
+            <label style="cursor: pointer;"><input type="checkbox" id="badgeToggle" checked> Show Icon Badge</label>
+        </div>
+        <div class="setting-row" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+            <span>Custom SVG Hat (Upload)</span>
+            <input type="file" id="svgUpload" accept=".svg" style="font-size: 10px; width: 100%;">
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="button-group">
+            <button id="share">Share King 👑</button>
+            <button id="clear">Reset</button>
+        </div>
     </div>
     <script src="popup.js"></script>
 </body>

@@ -20,6 +20,21 @@
     filter: drop-shadow(0px 3px 2px rgba(0,0,0,0.3));
 }
 
+.lobster-count-label {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    background: #ff4500;
+    color: white;
+    font-size: 10px;
+    padding: 1px 4px;
+    border-radius: 8px;
+    font-weight: bold;
+    border: 1px solid white;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    z-index: 11;
+}
+
 /* 强制所有可能的头像父容器不要切断帽子 */
 [data-testid^="UserAvatar-Container"],
 [data-testid="Tweet-User-Avatar"],

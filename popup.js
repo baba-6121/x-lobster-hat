@@ -7,10 +7,35 @@ document.getElementById('badgeToggle').onchange = (e) => {
     chrome.storage.local.set({ badgeEnabled: e.target.checked });
 };
 
+document.getElementById('showCountToggle').onchange = (e) => {
+    chrome.storage.local.set({ showCountEnabled: e.target.checked });
+};
+
+document.getElementById('baseColor').onchange = (e) => {
+    chrome.storage.local.set({ baseColor: e.target.value });
+};
+
+document.getElementById('svgUpload').onchange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const svgContent = event.target.result;
+            // 简单校验是否包含 <svg
+            if (svgContent.includes('<svg')) {
+                chrome.storage.local.set({ customSvg: svgContent });
+            }
+        };
+        reader.readAsText(file);
+    }
+};
+
 // 初始化开关状态
-chrome.storage.local.get(['highlightEnabled', 'badgeEnabled'], (data) => {
+chrome.storage.local.get(['highlightEnabled', 'badgeEnabled', 'showCountEnabled', 'baseColor'], (data) => {
     document.getElementById('highlightToggle').checked = data.highlightEnabled !== false;
     document.getElementById('badgeToggle').checked = data.badgeEnabled !== false;
+    document.getElementById('showCountToggle').checked = data.showCountEnabled !== false;
+    if (data.baseColor) document.getElementById('baseColor').value = data.baseColor;
 });
 
 async function updateStats() {

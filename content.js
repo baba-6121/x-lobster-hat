@@ -1,4 +1,4 @@
-const LOBSTER_SVG = `
+const DEFAULT_LOBSTER_SVG = `
 <svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg" class="lobster-hat-svg">
     <!-- 龙虾身体/帽子主体 -->
     <path d="M20,45 Q50,5 80,45 Q50,35 20,45" fill="currentColor" />
@@ -17,54 +17,63 @@ const LOBSTER_SVG = `
 `;
 
 // 辅助函数：根据频次获取颜色
-function getLobsterColor(count) {
-    // 基础颜色映射逻辑
-    if (count >= 100) return 'hsl(280, 100%, 50%)'; // 100+ 次：霓虹紫色 (神话级)
-    if (count >= 50) return 'hsl(200, 100%, 50%)';  // 50+ 次：赛博蓝色 (传说级)
+function getLobsterColor(count, baseColor = '#ff4500') {
+    if (count >= 100) return 'hsl(280, 100%, 50%)'; 
+    if (count >= 50) return 'hsl(200, 100%, 50%)';
     
-    const minLightness = 30; // 最深 (深红)
-    const maxLightness = 60; // 最浅 (亮粉红)
+    const minLightness = 30;
+    const maxLightness = 60;
     const lightness = Math.max(minLightness, maxLightness - (count * 5));
     return `hsl(0, 100%, ${lightness}%)`;
 }
 
 // 给头像戴帽子
-function wearHat(avatarElement, count, isTop1 = false) {
+async function wearHat(avatarElement, count, isTop1 = false) {
+    const storage = await chrome.storage.local.get(['customSvg', 'showCountEnabled', 'baseColor']);
+    const svgToUse = storage.customSvg || DEFAULT_LOBSTER_SVG;
+    const showCount = storage.showCountEnabled !== false;
+
     if (avatarElement.querySelector('.lobster-hat-container')) {
         const existingHat = avatarElement.querySelector('.lobster-hat-svg');
+        const existingLabel = avatarElement.querySelector('.lobster-count-label');
+        
         if (existingHat) {
-            existingHat.style.color = getLobsterColor(count);
-            
-            // 特效叠加逻辑
+            existingHat.style.color = getLobsterColor(count, storage.baseColor);
             let filters = ['drop-shadow(0px 3px 2px rgba(0,0,0,0.3))'];
-            
-            if (isTop1) {
-                filters.push('drop-shadow(0px 0px 8px rgba(255, 215, 0, 0.9))');
-            }
-            
-            if (count >= 100) {
-                avatarElement.classList.add('lobster-mythic-glow');
-            } else if (count >= 50) {
-                avatarElement.classList.add('lobster-legend-glow');
-            }
-            
+            if (isTop1) filters.push('drop-shadow(0px 0px 8px rgba(255, 215, 0, 0.9))');
             existingHat.style.filter = filters.join(' ');
+        }
+        
+        if (existingLabel) {
+            existingLabel.innerText = count;
+            existingLabel.style.display = showCount ? 'block' : 'none';
+        } else if (showCount) {
+            const label = document.createElement('span');
+            label.className = 'lobster-count-label';
+            label.innerText = count;
+            avatarElement.querySelector('.lobster-hat-container').appendChild(label);
         }
         return;
     }
 
     const container = document.createElement('div');
     container.className = 'lobster-hat-container';
-    container.innerHTML = LOBSTER_SVG;
+    container.innerHTML = svgToUse;
     
     const svg = container.querySelector('svg');
-    svg.style.color = getLobsterColor(count);
-    
-    let filters = ['drop-shadow(0px 3px 2px rgba(0,0,0,0.3))'];
-    if (isTop1) {
-        filters.push('drop-shadow(0px 0px 8px rgba(255, 215, 0, 0.9))');
+    if (svg) {
+        svg.style.color = getLobsterColor(count, storage.baseColor);
+        let filters = ['drop-shadow(0px 3px 2px rgba(0,0,0,0.3))'];
+        if (isTop1) filters.push('drop-shadow(0px 0px 8px rgba(255, 215, 0, 0.9))');
+        svg.style.filter = filters.join(' ');
     }
-    svg.style.filter = filters.join(' ');
+
+    if (showCount) {
+        const label = document.createElement('span');
+        label.className = 'lobster-count-label';
+        label.innerText = count;
+        container.appendChild(label);
+    }
     
     if (count >= 100) {
         avatarElement.classList.add('lobster-mythic-glow');
@@ -72,7 +81,6 @@ function wearHat(avatarElement, count, isTop1 = false) {
         avatarElement.classList.add('lobster-legend-glow');
     }
     
-    // 增加一个“戴帽”瞬间的 Pop 动画
     container.style.animation = 'lobster-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), lobster-float 3s ease-in-out infinite';
     
     avatarElement.style.position = 'relative';
@@ -81,21 +89,18 @@ function wearHat(avatarElement, count, isTop1 = false) {
 
 // 扫描推文
 async function scanTweets() {
-    // 扫描所有可能的推文容器
     const tweets = document.querySelectorAll('article[data-testid="tweet"]');
     const storage = await chrome.storage.local.get(['counts', 'processedTweets', 'highlightEnabled']);
     const counts = storage.counts || {};
     const processedTweets = storage.processedTweets || [];
     const highlightEnabled = storage.highlightEnabled !== false;
 
-    // 找出当前的 Top 1 玩家
     const sortedUsers = Object.entries(counts).sort((a, b) => b[1] - a[1]);
     const top1User = sortedUsers.length > 0 ? sortedUsers[0][0] : null;
 
     let updated = false;
     let foundLobstersCount = 0;
 
-    // 1. 处理推文中的头像 (Timeline)
     tweets.forEach(tweet => {
         const textNode = tweet.querySelector('[data-testid="tweetText"]');
         const avatarNode = tweet.querySelector('[data-testid="Tweet-User-Avatar"]');
@@ -106,10 +111,9 @@ async function scanTweets() {
             const userLink = tweet.querySelector('a[role="link"][href^="/"]');
             if (userLink) {
                 const username = userLink.getAttribute('href').replace('/', '');
-                const keywordRegex = /\bopenclaw\b/i;
+                const keywordRegex = /\b(openclaw|龙虾)\b/i;
                 
                 if (textNode && keywordRegex.test(textNode.innerText)) {
-                    // 计数逻辑
                     if (tweetId && !processedTweets.includes(tweetId)) {
                         counts[username] = (counts[username] || 0) + 1;
                         processedTweets.push(tweetId);
@@ -117,12 +121,10 @@ async function scanTweets() {
                         updated = true;
                     }
 
-                    // 高亮逻辑
                     if (highlightEnabled && !textNode.querySelector('.lobster-highlight')) {
                         const originalHTML = textNode.innerHTML;
-                        // 简单的替换逻辑，保留大小写
                         const newHTML = originalHTML.replace(
-                            new RegExp('(\\bopenclaw\\b)', 'gi'),
+                            new RegExp('(\\bopenclaw\\b|龙虾)', 'gi'),
                             '<span class="lobster-highlight">$1</span>'
                         );
                         if (newHTML !== originalHTML) {
@@ -139,14 +141,12 @@ async function scanTweets() {
         }
     });
 
-    // 更新图标 Badge (显示当前页面戴帽子的人数)
     chrome.runtime.sendMessage({ 
         action: "updateBadge", 
         count: foundLobstersCount 
     });
 
     // 2. 处理个人主页大头像 (Profile)
-    // ... 保持原有逻辑 ...
     const profileAvatar = document.querySelector('[data-testid="UserProfileHeader_Items"]')?.parentElement?.querySelector('[data-testid^="UserAvatar-Container"]');
     if (profileAvatar) {
         const username = window.location.pathname.replace('/', '');
@@ -168,15 +168,13 @@ async function scanTweets() {
     }
 }
 
-// 监听存储变化（如点击清除按钮）
+// 监听存储变化
 chrome.storage.onChanged.addListener((changes) => {
     if (changes.counts && Object.keys(changes.counts.newValue).length === 0) {
-        // 清除所有帽子
         document.querySelectorAll('.lobster-hat-container').forEach(el => el.remove());
     }
 });
 
-// 性能优化：使用防抖函数减少扫描频率
 function debounce(func, wait) {
     let timeout;
     return function() {
@@ -188,9 +186,7 @@ function debounce(func, wait) {
 
 const debouncedScan = debounce(scanTweets, 200);
 
-// 监听动态加载
 const observer = new MutationObserver((mutations) => {
-    // 只有当增加了新节点时才触发扫描
     const hasNewNodes = mutations.some(m => m.addedNodes.length > 0);
     if (hasNewNodes) {
         debouncedScan();
