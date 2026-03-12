@@ -16,29 +16,78 @@ const DEFAULT_LOBSTER_SVG = `
 </svg>
 `;
 
-// 辅助函数：根据频次获取颜色
-function getLobsterColor(count, baseColor = '#ff4500') {
+// 内存缓存：存储当前配置，避免频繁读取 storage
+let pluginConfig = {
+    customSvg: null,
+    showCountEnabled: true,
+    baseColor: '#ff4500',
+    highlightEnabled: true,
+    badgeEnabled: true,
+    counts: {},
+    processedTweets: []
+};
+
+// 初始化与监听配置变化
+async function initConfig() {
+    const storage = await chrome.storage.local.get(null);
+    Object.assign(pluginConfig, storage);
+}
+
+chrome.storage.onChanged.addListener((changes) => {
+    for (let key in changes) {
+        pluginConfig[key] = changes[key].newValue;
+    }
+    // 如果清空了计数，立即移除页面上的帽子
+    if (changes.counts && Object.keys(changes.counts.newValue || {}).length === 0) {
+        document.querySelectorAll('.lobster-hat-container').forEach(el => el.remove());
+    }
+});
+
+// 辅助函数：十六进制转 HSL (用于智能插值)
+function hexToHsl(hex) {
+    let r = parseInt(hex.slice(1, 3), 16) / 255;
+    let g = parseInt(hex.slice(3, 5), 16) / 255;
+    let b = parseInt(hex.slice(5, 7), 16) / 255;
+    let max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h, s, l = (max + min) / 2;
+    if (max == min) { h = s = 0; }
+    else {
+        let d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+    }
+    return [h * 360, s * 100, l * 100];
+}
+
+// 辅助函数：根据频次获取颜色 (智能插值版)
+function getLobsterColor(count, baseHex) {
     if (count >= 100) return 'hsl(280, 100%, 50%)'; 
     if (count >= 50) return 'hsl(200, 100%, 50%)';
     
-    const minLightness = 30;
-    const maxLightness = 60;
-    const lightness = Math.max(minLightness, maxLightness - (count * 5));
-    return `hsl(0, 100%, ${lightness}%)`;
+    const [h, s, l] = hexToHsl(baseHex || '#ff4500');
+    // 频次越高，亮度越低 (变深)，饱和度越高 (变艳)
+    const newL = Math.max(20, l - (count * 4));
+    const newS = Math.min(100, s + (count * 2));
+    return `hsl(${h}, ${newS}%, ${newL}%)`;
 }
 
-// 给头像戴帽子
-async function wearHat(avatarElement, count, isTop1 = false) {
-    const storage = await chrome.storage.local.get(['customSvg', 'showCountEnabled', 'baseColor']);
-    const svgToUse = storage.customSvg || DEFAULT_LOBSTER_SVG;
-    const showCount = storage.showCountEnabled !== false;
+// 给头像戴帽子 (同步渲染版)
+function wearHat(avatarElement, count, isTop1 = false) {
+    const svgToUse = pluginConfig.customSvg || DEFAULT_LOBSTER_SVG;
+    const showCount = pluginConfig.showCountEnabled !== false;
 
     if (avatarElement.querySelector('.lobster-hat-container')) {
-        const existingHat = avatarElement.querySelector('.lobster-hat-svg');
-        const existingLabel = avatarElement.querySelector('.lobster-count-label');
+        const container = avatarElement.querySelector('.lobster-hat-container');
+        const existingHat = container.querySelector('.lobster-hat-svg');
+        const existingLabel = container.querySelector('.lobster-count-label');
         
         if (existingHat) {
-            existingHat.style.color = getLobsterColor(count, storage.baseColor);
+            existingHat.style.color = getLobsterColor(count, pluginConfig.baseColor);
             let filters = ['drop-shadow(0px 3px 2px rgba(0,0,0,0.3))'];
             if (isTop1) filters.push('drop-shadow(0px 0px 8px rgba(255, 215, 0, 0.9))');
             existingHat.style.filter = filters.join(' ');
@@ -47,11 +96,6 @@ async function wearHat(avatarElement, count, isTop1 = false) {
         if (existingLabel) {
             existingLabel.innerText = count;
             existingLabel.style.display = showCount ? 'block' : 'none';
-        } else if (showCount) {
-            const label = document.createElement('span');
-            label.className = 'lobster-count-label';
-            label.innerText = count;
-            avatarElement.querySelector('.lobster-hat-container').appendChild(label);
         }
         return;
     }
@@ -62,7 +106,10 @@ async function wearHat(avatarElement, count, isTop1 = false) {
     
     const svg = container.querySelector('svg');
     if (svg) {
-        svg.style.color = getLobsterColor(count, storage.baseColor);
+        svg.removeAttribute('width');
+        svg.removeAttribute('height');
+        svg.classList.add('lobster-hat-svg');
+        svg.style.color = getLobsterColor(count, pluginConfig.baseColor);
         let filters = ['drop-shadow(0px 3px 2px rgba(0,0,0,0.3))'];
         if (isTop1) filters.push('drop-shadow(0px 0px 8px rgba(255, 215, 0, 0.9))');
         svg.style.filter = filters.join(' ');
@@ -82,7 +129,6 @@ async function wearHat(avatarElement, count, isTop1 = false) {
     }
     
     container.style.animation = 'lobster-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), lobster-float 3s ease-in-out infinite';
-    
     avatarElement.style.position = 'relative';
     avatarElement.appendChild(container);
 }
@@ -90,10 +136,9 @@ async function wearHat(avatarElement, count, isTop1 = false) {
 // 扫描推文
 async function scanTweets() {
     const tweets = document.querySelectorAll('article[data-testid="tweet"]');
-    const storage = await chrome.storage.local.get(['counts', 'processedTweets', 'highlightEnabled']);
-    const counts = storage.counts || {};
-    const processedTweets = storage.processedTweets || [];
-    const highlightEnabled = storage.highlightEnabled !== false;
+    const counts = pluginConfig.counts || {};
+    const processedTweets = pluginConfig.processedTweets || [];
+    const highlightEnabled = pluginConfig.highlightEnabled !== false;
 
     const sortedUsers = Object.entries(counts).sort((a, b) => b[1] - a[1]);
     const top1User = sortedUsers.length > 0 ? sortedUsers[0][0] : null;
@@ -141,19 +186,14 @@ async function scanTweets() {
         }
     });
 
-    chrome.runtime.sendMessage({ 
-        action: "updateBadge", 
-        count: foundLobstersCount 
-    });
+    chrome.runtime.sendMessage({ action: "updateBadge", count: foundLobstersCount });
 
-    // 2. 处理个人主页大头像 (Profile)
     const profileAvatar = document.querySelector('[data-testid="UserProfileHeader_Items"]')?.parentElement?.querySelector('[data-testid^="UserAvatar-Container"]');
     if (profileAvatar) {
         const username = window.location.pathname.replace('/', '');
         if (counts[username] > 0) wearHat(profileAvatar, counts[username], username === top1User);
     }
 
-    // 3. 处理侧边栏头像 (Sidebar / Who to follow)
     const sidebarAvatars = document.querySelectorAll('[data-testid="UserCell"] [data-testid^="UserAvatar-Container"]');
     sidebarAvatars.forEach(avatar => {
         const userLink = avatar.closest('[data-testid="UserCell"]')?.querySelector('a[role="link"]');
@@ -168,13 +208,6 @@ async function scanTweets() {
     }
 }
 
-// 监听存储变化
-chrome.storage.onChanged.addListener((changes) => {
-    if (changes.counts && Object.keys(changes.counts.newValue).length === 0) {
-        document.querySelectorAll('.lobster-hat-container').forEach(el => el.remove());
-    }
-});
-
 function debounce(func, wait) {
     let timeout;
     return function() {
@@ -184,14 +217,12 @@ function debounce(func, wait) {
     };
 }
 
-const debouncedScan = debounce(scanTweets, 200);
-
-const observer = new MutationObserver((mutations) => {
-    const hasNewNodes = mutations.some(m => m.addedNodes.length > 0);
-    if (hasNewNodes) {
-        debouncedScan();
-    }
+// 启动
+initConfig().then(() => {
+    const debouncedScan = debounce(scanTweets, 200);
+    const observer = new MutationObserver((mutations) => {
+        if (mutations.some(m => m.addedNodes.length > 0)) debouncedScan();
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    scanTweets();
 });
-
-observer.observe(document.body, { childList: true, subtree: true });
-scanTweets();
