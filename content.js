@@ -124,9 +124,25 @@ chrome.storage.onChanged.addListener((changes) => {
     }
 });
 
+// 性能优化：使用防抖函数减少扫描频率
+function debounce(func, wait) {
+    let timeout;
+    return function() {
+        const context = this, args = arguments;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), wait);
+    };
+}
+
+const debouncedScan = debounce(scanTweets, 200);
+
 // 监听动态加载
-const observer = new MutationObserver(() => {
-    scanTweets();
+const observer = new MutationObserver((mutations) => {
+    // 只有当增加了新节点时才触发扫描
+    const hasNewNodes = mutations.some(m => m.addedNodes.length > 0);
+    if (hasNewNodes) {
+        debouncedScan();
+    }
 });
 
 observer.observe(document.body, { childList: true, subtree: true });
