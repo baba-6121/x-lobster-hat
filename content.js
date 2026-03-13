@@ -16,6 +16,14 @@ const DEFAULT_LOBSTER_SVG = `
 </svg>
 `;
 
+// 移除高亮的辅助函数
+function removeHighlights() {
+    document.querySelectorAll('.lobster-highlight').forEach(el => {
+        const text = el.innerText;
+        el.replaceWith(document.createTextNode(text));
+    });
+}
+
 // 内存缓存：存储当前配置，避免频繁读取 storage
 let pluginConfig = {
     customSvg: null,
@@ -36,6 +44,10 @@ async function initConfig() {
 chrome.storage.onChanged.addListener((changes) => {
     for (let key in changes) {
         pluginConfig[key] = changes[key].newValue;
+    }
+    // 如果关闭了高亮，立即移除页面上的高亮
+    if (changes.highlightEnabled && changes.highlightEnabled.newValue === false) {
+        removeHighlights();
     }
     // 如果清空了计数，立即移除页面上的帽子
     if (changes.counts && Object.keys(changes.counts.newValue || {}).length === 0) {

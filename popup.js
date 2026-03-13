@@ -1,43 +1,3 @@
-// 监听开关变化
-document.getElementById('highlightToggle').onchange = (e) => {
-    chrome.storage.local.set({ highlightEnabled: e.target.checked });
-};
-
-document.getElementById('badgeToggle').onchange = (e) => {
-    chrome.storage.local.set({ badgeEnabled: e.target.checked });
-};
-
-document.getElementById('showCountToggle').onchange = (e) => {
-    chrome.storage.local.set({ showCountEnabled: e.target.checked });
-};
-
-document.getElementById('baseColor').onchange = (e) => {
-    chrome.storage.local.set({ baseColor: e.target.value });
-};
-
-document.getElementById('svgUpload').onchange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            const svgContent = event.target.result;
-            // 简单校验是否包含 <svg
-            if (svgContent.includes('<svg')) {
-                chrome.storage.local.set({ customSvg: svgContent });
-            }
-        };
-        reader.readAsText(file);
-    }
-};
-
-// 初始化开关状态
-chrome.storage.local.get(['highlightEnabled', 'badgeEnabled', 'showCountEnabled', 'baseColor'], (data) => {
-    document.getElementById('highlightToggle').checked = data.highlightEnabled !== false;
-    document.getElementById('badgeToggle').checked = data.badgeEnabled !== false;
-    document.getElementById('showCountToggle').checked = data.showCountEnabled !== false;
-    if (data.baseColor) document.getElementById('baseColor').value = data.baseColor;
-});
-
 async function updateStats() {
     const storage = await chrome.storage.local.get('counts');
     const counts = storage.counts || {};
@@ -45,7 +5,7 @@ async function updateStats() {
     
     const entries = Object.entries(counts);
     if (entries.length === 0) {
-        statsDiv.innerText = "No lobsters yet!";
+        statsDiv.innerHTML = '<div style="padding: 20px; text-align: center; color: #536471;">No lobsters yet! 🦞</div>';
         return;
     }
 
@@ -88,9 +48,8 @@ document.getElementById('share').onclick = async () => {
     chrome.tabs.create({ url });
 };
 
-document.getElementById('clear').onclick = async () => {
-    await chrome.storage.local.set({ counts: {}, processedTweets: [] });
-    updateStats();
+document.getElementById('options').onclick = () => {
+    chrome.runtime.openOptionsPage();
 };
 
 updateStats();

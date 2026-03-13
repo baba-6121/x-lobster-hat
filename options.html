@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>X Lobster Hat Settings</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f7f9f9; color: #0f1419; padding: 40px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        h1 { font-size: 24px; border-bottom: 2px solid #ff4500; padding-bottom: 10px; margin-bottom: 25px; }
+        .section { margin-bottom: 30px; }
+        .section-title { font-weight: bold; font-size: 18px; margin-bottom: 15px; display: block; }
+        .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eff3f4; }
+        .setting-row:last-child { border-bottom: none; }
+        .description { font-size: 14px; color: #536471; margin-top: 4px; display: block; }
+        
+        input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; }
+        input[type="color"] { border: none; width: 50px; height: 30px; cursor: pointer; background: none; }
+        button { background: #0f1419; color: white; border: none; padding: 10px 20px; border-radius: 999px; cursor: pointer; font-weight: bold; font-size: 15px; transition: opacity 0.2s; }
+        button:hover { opacity: 0.8; }
+        button.reset-btn { background: #ff4500; margin-top: 10px; }
+        
+        .preview-box { border: 2px dashed #eff3f4; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; align-items: center; margin-top: 10px; }
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1d9bf0; color: white; padding: 10px 20px; border-radius: 999px; display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🦞 X Lobster Hat Settings</h1>
+        
+        <div class="section">
+            <span class="section-title">Visuals</span>
+            <div class="setting-row">
+                <div>
+                    <strong>Hat Base Color</strong>
+                    <span class="description">Pick the starting color for your lobster hats.</span>
+                </div>
+                <input type="color" id="baseColor">
+            </div>
+            <div class="setting-row">
+                <div>
+                    <strong>Custom SVG Hat</strong>
+                    <span class="description">Upload your own .svg to replace the lobster.</span>
+                </div>
+                <input type="file" id="svgUpload" accept=".svg">
+            </div>
+            <div class="preview-box">
+                <span style="font-size: 12px; color: #536471; margin-bottom: 10px;">Preview</span>
+                <div id="hatPreview" style="width: 50px; height: 30px; position: relative;"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <span class="section-title">Features</span>
+            <div class="setting-row">
+                <div>
+                    <strong>Highlight Key</strong>
+                    <span class="description">Highlight "openclaw" or "龙虾" in tweets.</span>
+                </div>
+                <input type="checkbox" id="highlightToggle">
+            </div>
+            <div class="setting-row">
+                <div>
+                    <strong>Show Count on Hat</strong>
+                    <span class="description">Show mention frequency badge on the avatar.</span>
+                </div>
+                <input type="checkbox" id="showCountToggle">
+            </div>
+            <div class="setting-row">
+                <div>
+                    <strong>Icon Badge</strong>
+                    <span class="description">Show count of lobsters on the extension icon.</span>
+                </div>
+                <input type="checkbox" id="badgeToggle">
+            </div>
+        </div>
+
+        <div class="section">
+            <span class="section-title">Danger Zone</span>
+            <button id="clearData" class="reset-btn">Reset All Statistics</button>
+            <span class="description">This will clear all mention counts and processed tweet IDs.</span>
+        </div>
+    </div>
+    <div id="toast" class="toast">Settings Saved!</div>
+    <script src="options.js"></script>
+</body>
+</html>
