@@ -25,5 +25,11 @@
   "resetStatsDesc": { "message": "这将清除所有提及计数和已处理的推文 ID。" },
   "settingsSaved": { "message": "设置已保存！" },
   "confirmReset": { "message": "确定要重置所有统计数据吗？" },
-  "shareText": { "message": "我的 X 龙虾排行榜！🦞✨\n\n👑 龙虾王: @$KING$ ($COUNT$ 只龙虾)\n\n安装龙虾帽插件一起玩吧！ #OpenClaw #LobsterHat" }
+  "shareText": { 
+    "message": "我的 X 龙虾排行榜！🦞✨\n\n👑 龙虾王: @$KING$ ($COUNT$ 只龙虾)\n\n安装龙虾帽插件一起玩吧！ #OpenClaw #LobsterHat",
+    "placeholders": {
+      "king": { "content": "$1" },
+      "count": { "content": "$2" }
+    }
+  }
 }

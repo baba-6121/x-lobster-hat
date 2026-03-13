@@ -25,5 +25,11 @@
   "resetStatsDesc": { "message": "This will clear all mention counts and processed tweet IDs." },
   "settingsSaved": { "message": "Settings Saved!" },
   "confirmReset": { "message": "Are you sure you want to reset all stats?" },
-  "shareText": { "message": "My X Lobster Leaderboard! 🦞✨\n\n👑 King: @$KING$ ($COUNT$ lobsters)\n\nInstall Lobster Hat to join the fun! #OpenClaw #LobsterHat" }
+  "shareText": { 
+    "message": "My X Lobster Leaderboard! 🦞✨\n\n👑 King: @$KING$ ($COUNT$ lobsters)\n\nInstall Lobster Hat to join the fun! #OpenClaw #LobsterHat",
+    "placeholders": {
+      "king": { "content": "$1" },
+      "count": { "content": "$2" }
+    }
+  }
 }
