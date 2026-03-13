@@ -1,17 +1,37 @@
 function showToast() {
     const toast = document.getElementById('toast');
+    toast.innerText = chrome.i18n.getMessage("settingsSaved");
     toast.style.display = 'block';
     setTimeout(() => { toast.style.display = 'none'; }, 2000);
 }
 
-// 映射表：UI ID 对应 Storage Key
 const ID_MAP = {
     'highlightToggle': 'highlightEnabled',
     'badgeToggle': 'badgeEnabled',
     'showCountToggle': 'showCountEnabled'
 };
 
-// 加载设置
+// 国际化初始化
+function initI18n() {
+    document.getElementById('title').innerText = chrome.i18n.getMessage("settingsTitle");
+    document.getElementById('visualsTitle').innerText = chrome.i18n.getMessage("visualsSection");
+    document.getElementById('baseColorTitle').innerText = chrome.i18n.getMessage("hatBaseColor");
+    document.getElementById('baseColorDesc').innerText = chrome.i18n.getMessage("hatBaseColorDesc");
+    document.getElementById('customSvgTitle').innerText = chrome.i18n.getMessage("customSvg");
+    document.getElementById('customSvgDesc').innerText = chrome.i18n.getMessage("customSvgDesc");
+    document.getElementById('resetSvg').innerText = chrome.i18n.getMessage("resetSvg");
+    document.getElementById('featuresTitle').innerText = chrome.i18n.getMessage("featuresSection");
+    document.getElementById('highlightTitle').innerText = chrome.i18n.getMessage("highlightKey");
+    document.getElementById('highlightDesc').innerText = chrome.i18n.getMessage("highlightKeyDesc");
+    document.getElementById('showCountTitle').innerText = chrome.i18n.getMessage("showCount");
+    document.getElementById('showCountDesc').innerText = chrome.i18n.getMessage("showCountDesc");
+    document.getElementById('badgeToggleTitle').innerText = chrome.i18n.getMessage("iconBadge");
+    document.getElementById('badgeToggleDesc').innerText = chrome.i18n.getMessage("iconBadgeDesc");
+    document.getElementById('dangerZoneTitle').innerText = chrome.i18n.getMessage("dangerZone");
+    document.getElementById('clearData').innerText = chrome.i18n.getMessage("resetStats");
+    document.getElementById('clearDataDesc').innerText = chrome.i18n.getMessage("resetStatsDesc");
+}
+
 async function loadSettings() {
     const data = await chrome.storage.local.get(['highlightEnabled', 'badgeEnabled', 'showCountEnabled', 'baseColor', 'customSvg']);
     
@@ -45,7 +65,6 @@ function updatePreview(svg, color) {
     }
 }
 
-// 绑定 Checkbox 事件
 document.querySelectorAll('input[type="checkbox"]').forEach(el => {
     el.onchange = (e) => {
         const storageKey = ID_MAP[e.target.id] || e.target.id;
@@ -79,11 +98,19 @@ document.getElementById('svgUpload').onchange = (e) => {
     }
 };
 
+document.getElementById('resetSvg').onclick = () => {
+    chrome.storage.local.set({ customSvg: null });
+    updatePreview(null, document.getElementById('baseColor').value);
+    document.getElementById('svgUpload').value = "";
+    showToast();
+};
+
 document.getElementById('clearData').onclick = async () => {
-    if (confirm('Are you sure you want to reset all stats?')) {
+    if (confirm(chrome.i18n.getMessage("confirmReset"))) {
         await chrome.storage.local.set({ counts: {}, processedTweets: [] });
         showToast();
     }
 };
 
+initI18n();
 loadSettings();

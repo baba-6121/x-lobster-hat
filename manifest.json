@@ -1,9 +1,10 @@
 {
   "manifest_version": 3,
-  "name": "X Lobster Hat",
-  "version": "1.0.0",
-  "description": "Adds a lobster hat to user avatars on X when they mention 'openclaw'.",
-  "permissions": ["storage"],
+  "name": "__MSG_extensionName__",
+  "version": "1.2.1",
+  "description": "__MSG_extensionDesc__",
+  "default_locale": "en",
+  "permissions": ["storage", "tabs"],
   "content_scripts": [
     {
       "matches": ["https://x.com/*"],

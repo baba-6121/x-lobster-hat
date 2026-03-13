@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>X Lobster Hat Settings</title>
+    <title>Settings</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f7f9f9; color: #0f1419; padding: 40px; }
         .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
@@ -18,6 +18,7 @@
         button { background: #0f1419; color: white; border: none; padding: 10px 20px; border-radius: 999px; cursor: pointer; font-weight: bold; font-size: 15px; transition: opacity 0.2s; }
         button:hover { opacity: 0.8; }
         button.reset-btn { background: #ff4500; margin-top: 10px; }
+        button.secondary-btn { background: #536471; font-size: 12px; padding: 5px 12px; margin-top: 5px; }
         
         .preview-box { border: 2px dashed #eff3f4; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; align-items: center; margin-top: 10px; }
         .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1d9bf0; color: white; padding: 10px 20px; border-radius: 999px; display: none; }
@@ -25,23 +26,26 @@
 </head>
 <body>
     <div class="container">
-        <h1>🦞 X Lobster Hat Settings</h1>
+        <h1 id="title">Settings</h1>
         
         <div class="section">
-            <span class="section-title">Visuals</span>
+            <span class="section-title" id="visualsTitle">Visuals</span>
             <div class="setting-row">
                 <div>
-                    <strong>Hat Base Color</strong>
-                    <span class="description">Pick the starting color for your lobster hats.</span>
+                    <strong id="baseColorTitle">Hat Base Color</strong>
+                    <span class="description" id="baseColorDesc">Pick the starting color for your lobster hats.</span>
                 </div>
                 <input type="color" id="baseColor">
             </div>
             <div class="setting-row">
                 <div>
-                    <strong>Custom SVG Hat</strong>
-                    <span class="description">Upload your own .svg to replace the lobster.</span>
+                    <strong id="customSvgTitle">Custom SVG Hat</strong>
+                    <span class="description" id="customSvgDesc">Upload your own .svg to replace the lobster.</span>
                 </div>
-                <input type="file" id="svgUpload" accept=".svg">
+                <div style="display: flex; flex-direction: column; align-items: flex-end;">
+                    <input type="file" id="svgUpload" accept=".svg">
+                    <button id="resetSvg" class="secondary-btn">Reset to Default</button>
+                </div>
             </div>
             <div class="preview-box">
                 <span style="font-size: 12px; color: #536471; margin-bottom: 10px;">Preview</span>
@@ -50,34 +54,34 @@
         </div>
 
         <div class="section">
-            <span class="section-title">Features</span>
+            <span class="section-title" id="featuresTitle">Features</span>
             <div class="setting-row">
                 <div>
-                    <strong>Highlight Key</strong>
-                    <span class="description">Highlight "openclaw" or "龙虾" in tweets.</span>
+                    <strong id="highlightTitle">Highlight Key</strong>
+                    <span class="description" id="highlightDesc">Highlight keywords in tweets.</span>
                 </div>
                 <input type="checkbox" id="highlightToggle">
             </div>
             <div class="setting-row">
                 <div>
-                    <strong>Show Count on Hat</strong>
-                    <span class="description">Show mention frequency badge on the avatar.</span>
+                    <strong id="showCountTitle">Show Count on Hat</strong>
+                    <span class="description" id="showCountDesc">Show frequency badge.</span>
                 </div>
                 <input type="checkbox" id="showCountToggle">
             </div>
             <div class="setting-row">
                 <div>
-                    <strong>Icon Badge</strong>
-                    <span class="description">Show count of lobsters on the extension icon.</span>
+                    <strong id="badgeToggleTitle">Icon Badge</strong>
+                    <span class="description" id="badgeToggleDesc">Show count on icon.</span>
                 </div>
                 <input type="checkbox" id="badgeToggle">
             </div>
         </div>
 
         <div class="section">
-            <span class="section-title">Danger Zone</span>
+            <span class="section-title" id="dangerZoneTitle">Danger Zone</span>
             <button id="clearData" class="reset-btn">Reset All Statistics</button>
-            <span class="description">This will clear all mention counts and processed tweet IDs.</span>
+            <span class="description" id="clearDataDesc">Clear all counts and IDs.</span>
         </div>
     </div>
     <div id="toast" class="toast">Settings Saved!</div>

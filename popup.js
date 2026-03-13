@@ -1,3 +1,8 @@
+// 国际化文本初始化
+document.getElementById('title').innerText = chrome.i18n.getMessage("leaderboardTitle");
+document.getElementById('share').innerText = chrome.i18n.getMessage("shareKing");
+document.getElementById('options').innerText = chrome.i18n.getMessage("settingsBtn");
+
 async function updateStats() {
     const storage = await chrome.storage.local.get('counts');
     const counts = storage.counts || {};
@@ -5,7 +10,7 @@ async function updateStats() {
     
     const entries = Object.entries(counts);
     if (entries.length === 0) {
-        statsDiv.innerHTML = '<div style="padding: 20px; text-align: center; color: #536471;">No lobsters yet! 🦞</div>';
+        statsDiv.innerHTML = `<div style="padding: 20px; text-align: center; color: #536471;">${chrome.i18n.getMessage("noLobsters")}</div>`;
         return;
     }
 
@@ -37,12 +42,14 @@ document.getElementById('share').onclick = async () => {
     const counts = storage.counts || {};
     const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
     
-    let text = "My X Lobster Leaderboard! 🦞✨\n\n";
+    let text = "";
     if (sorted.length > 0) {
-        text += `👑 King: @${sorted[0][0]} (${sorted[0][1]} lobsters)\n`;
-        if (sorted.length > 1) text += `🥈 @${sorted[1][0]} (${sorted[1][1]})\n`;
+        text = chrome.i18n.getMessage("shareText")
+            .replace('$KING$', sorted[0][0])
+            .replace('$COUNT$', sorted[0][1]);
+    } else {
+        text = "My X Lobster Leaderboard! 🦞✨ #OpenClaw #LobsterHat";
     }
-    text += "\nInstall Lobster Hat to join the fun! #OpenClaw #LobsterHat";
     
     const url = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}`;
     chrome.tabs.create({ url });
