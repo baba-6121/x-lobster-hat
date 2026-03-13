@@ -4,6 +4,13 @@ function showToast() {
     setTimeout(() => { toast.style.display = 'none'; }, 2000);
 }
 
+// 映射表：UI ID 对应 Storage Key
+const ID_MAP = {
+    'highlightToggle': 'highlightEnabled',
+    'badgeToggle': 'badgeEnabled',
+    'showCountToggle': 'showCountEnabled'
+};
+
 // 加载设置
 async function loadSettings() {
     const data = await chrome.storage.local.get(['highlightEnabled', 'badgeEnabled', 'showCountEnabled', 'baseColor', 'customSvg']);
@@ -38,10 +45,11 @@ function updatePreview(svg, color) {
     }
 }
 
-// 绑定事件
+// 绑定 Checkbox 事件
 document.querySelectorAll('input[type="checkbox"]').forEach(el => {
     el.onchange = (e) => {
-        chrome.storage.local.set({ [e.target.id]: e.target.checked });
+        const storageKey = ID_MAP[e.target.id] || e.target.id;
+        chrome.storage.local.set({ [storageKey]: e.target.checked });
         showToast();
     };
 });
