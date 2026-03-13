@@ -21,6 +21,8 @@
   "iconBadge": { "message": "Icon Badge" },
   "iconBadgeDesc": { "message": "Show count of lobsters on the extension icon." },
   "dangerZone": { "message": "Danger Zone" },
+  "languageSelect": { "message": "Display Language" },
+  "languageSelectDesc": { "message": "Manually override the display language." },
   "resetStats": { "message": "Reset All Statistics" },
   "resetStatsDesc": { "message": "This will clear all mention counts and processed tweet IDs." },
   "settingsSaved": { "message": "Settings Saved!" },

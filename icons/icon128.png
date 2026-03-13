@@ -1,0 +1,19 @@
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+    <!-- 背景圆角矩形 -->
+    <rect width="128" height="128" rx="28" fill="#FF4500"/>
+    
+    <!-- 龙虾帽主体 (白色剪影) -->
+    <path d="M30,85 Q64,35 98,85 Q64,75 30,85" fill="white" />
+    
+    <!-- 钳子 -->
+    <path d="M25,75 Q10,60 20,55 Q25,65 30,75" fill="white" />
+    <path d="M103,75 Q118,60 108,55 Q103,65 98,75" fill="white" />
+    
+    <!-- 触角 -->
+    <path d="M55,45 Q50,30 40,35" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" />
+    <path d="M73,45 Q78,30 88,35" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" />
+    
+    <!-- 眼睛 -->
+    <circle cx="54" cy="65" r="4" fill="#FF4500" />
+    <circle cx="74" cy="65" r="4" fill="#FF4500" />
+</svg>

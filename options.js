@@ -1,6 +1,6 @@
 function showToast() {
     const toast = document.getElementById('toast');
-    toast.innerText = chrome.i18n.getMessage("settingsSaved");
+    toast.innerText = getI18nMsg("settingsSaved");
     toast.style.display = 'block';
     setTimeout(() => { toast.style.display = 'none'; }, 2000);
 }
@@ -11,25 +11,57 @@ const ID_MAP = {
     'showCountToggle': 'showCountEnabled'
 };
 
+// 全局变量存储语言包
+let languageDict = null;
+let currentLanguage = 'auto';
+
+// 获取国际化文本的包装函数
+function getI18nMsg(key) {
+    if (languageDict && languageDict[key]) {
+        return languageDict[key].message;
+    }
+    return chrome.i18n.getMessage(key);
+}
+
+// 加载语言文件
+async function loadLanguageDict(lang) {
+    if (lang === 'auto') {
+        languageDict = null;
+        return;
+    }
+    const response = await fetch(chrome.runtime.getURL(`_locales/${lang}/messages.json`));
+    languageDict = await response.json();
+}
+
 // 国际化初始化
-function initI18n() {
-    document.getElementById('title').innerText = chrome.i18n.getMessage("settingsTitle");
-    document.getElementById('visualsTitle').innerText = chrome.i18n.getMessage("visualsSection");
-    document.getElementById('baseColorTitle').innerText = chrome.i18n.getMessage("hatBaseColor");
-    document.getElementById('baseColorDesc').innerText = chrome.i18n.getMessage("hatBaseColorDesc");
-    document.getElementById('customSvgTitle').innerText = chrome.i18n.getMessage("customSvg");
-    document.getElementById('customSvgDesc').innerText = chrome.i18n.getMessage("customSvgDesc");
-    document.getElementById('resetSvg').innerText = chrome.i18n.getMessage("resetSvg");
-    document.getElementById('featuresTitle').innerText = chrome.i18n.getMessage("featuresSection");
-    document.getElementById('highlightTitle').innerText = chrome.i18n.getMessage("highlightKey");
-    document.getElementById('highlightDesc').innerText = chrome.i18n.getMessage("highlightKeyDesc");
-    document.getElementById('showCountTitle').innerText = chrome.i18n.getMessage("showCount");
-    document.getElementById('showCountDesc').innerText = chrome.i18n.getMessage("showCountDesc");
-    document.getElementById('badgeToggleTitle').innerText = chrome.i18n.getMessage("iconBadge");
-    document.getElementById('badgeToggleDesc').innerText = chrome.i18n.getMessage("iconBadgeDesc");
-    document.getElementById('dangerZoneTitle').innerText = chrome.i18n.getMessage("dangerZone");
-    document.getElementById('clearData').innerText = chrome.i18n.getMessage("resetStats");
-    document.getElementById('clearDataDesc').innerText = chrome.i18n.getMessage("resetStatsDesc");
+async function initI18n() {
+    const data = await chrome.storage.local.get('languageOverride');
+    currentLanguage = data.languageOverride || 'auto';
+    await loadLanguageDict(currentLanguage);
+
+    document.getElementById('title').innerText = getI18nMsg("settingsTitle");
+    document.getElementById('visualsTitle').innerText = getI18nMsg("visualsSection");
+    document.getElementById('baseColorTitle').innerText = getI18nMsg("hatBaseColor");
+    document.getElementById('baseColorDesc').innerText = getI18nMsg("hatBaseColorDesc");
+    document.getElementById('customSvgTitle').innerText = getI18nMsg("customSvg");
+    document.getElementById('customSvgDesc').innerText = getI18nMsg("customSvgDesc");
+    document.getElementById('resetSvg').innerText = getI18nMsg("resetSvg");
+    document.getElementById('featuresTitle').innerText = getI18nMsg("featuresSection");
+    
+    document.getElementById('languageSelectTitle').innerText = getI18nMsg("languageSelect");
+    document.getElementById('languageSelectDesc').innerText = getI18nMsg("languageSelectDesc");
+    
+    document.getElementById('highlightTitle').innerText = getI18nMsg("highlightKey");
+    document.getElementById('highlightDesc').innerText = getI18nMsg("highlightKeyDesc");
+    document.getElementById('showCountTitle').innerText = getI18nMsg("showCount");
+    document.getElementById('showCountDesc').innerText = getI18nMsg("showCountDesc");
+    document.getElementById('badgeToggleTitle').innerText = getI18nMsg("iconBadge");
+    document.getElementById('badgeToggleDesc').innerText = getI18nMsg("iconBadgeDesc");
+    document.getElementById('dangerZoneTitle').innerText = getI18nMsg("dangerZone");
+    document.getElementById('clearData').innerText = getI18nMsg("resetStats");
+    document.getElementById('clearDataDesc').innerText = getI18nMsg("resetStatsDesc");
+    
+    document.getElementById('languageOverride').value = currentLanguage;
 }
 
 async function loadSettings() {
@@ -73,6 +105,13 @@ document.querySelectorAll('input[type="checkbox"]').forEach(el => {
     };
 });
 
+document.getElementById('languageOverride').onchange = async (e) => {
+    const lang = e.target.value;
+    await chrome.storage.local.set({ languageOverride: lang });
+    await initI18n(); // 重新加载界面
+    showToast();
+};
+
 document.getElementById('baseColor').onchange = (e) => {
     const color = e.target.value;
     chrome.storage.local.set({ baseColor: color });
@@ -106,11 +145,10 @@ document.getElementById('resetSvg').onclick = () => {
 };
 
 document.getElementById('clearData').onclick = async () => {
-    if (confirm(chrome.i18n.getMessage("confirmReset"))) {
+    if (confirm(getI18nMsg("confirmReset"))) {
         await chrome.storage.local.set({ counts: {}, processedTweets: [] });
         showToast();
     }
 };
 
-initI18n();
-loadSettings();
+initI18n().then(loadSettings);

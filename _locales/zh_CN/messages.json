@@ -21,6 +21,8 @@
   "iconBadge": { "message": "图标角标" },
   "iconBadgeDesc": { "message": "在插件图标上显示龙虾数量。" },
   "dangerZone": { "message": "危险区域" },
+  "languageSelect": { "message": "显示语言" },
+  "languageSelectDesc": { "message": "手动覆盖界面显示语言。" },
   "resetStats": { "message": "重置所有统计数据" },
   "resetStatsDesc": { "message": "这将清除所有提及计数和已处理的推文 ID。" },
   "settingsSaved": { "message": "设置已保存！" },
