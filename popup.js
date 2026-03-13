@@ -43,10 +43,13 @@ async function updateStats() {
     const counts = storage.counts || {};
     const statsDiv = document.getElementById('stats');
     
-    if (Object.keys(counts).length === 0) {
+    const entries = Object.entries(counts);
+    if (entries.length === 0) {
         statsDiv.innerText = "No lobsters yet!";
         return;
     }
+
+    const sortedEntries = entries.sort((a, b) => b[1] - a[1]);
 
     statsDiv.innerHTML = sortedEntries
         .map(([user, count], index) => {
