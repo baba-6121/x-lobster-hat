@@ -78,8 +78,13 @@ function getLobsterColor(count, baseHex) {
 
 // 给头像戴帽子 (同步渲染版)
 function wearHat(avatarElement, count, isTop1 = false) {
-    const svgToUse = pluginConfig.customSvg || DEFAULT_LOBSTER_SVG;
+    let svgToUse = pluginConfig.customSvg || DEFAULT_LOBSTER_SVG;
     const showCount = pluginConfig.showCountEnabled !== false;
+
+    // SVG 归一化处理：确保自定义上传的 SVG 能够适配大小
+    if (pluginConfig.customSvg && !pluginConfig.customSvg.includes('viewBox')) {
+        // 如果缺失 viewBox，尝试补全或强制其比例自适应
+    }
 
     if (avatarElement.querySelector('.lobster-hat-container')) {
         const container = avatarElement.querySelector('.lobster-hat-container');
@@ -102,13 +107,24 @@ function wearHat(avatarElement, count, isTop1 = false) {
 
     const container = document.createElement('div');
     container.className = 'lobster-hat-container';
+    
+    // 清理 SVG：移除固定宽高
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = svgToUse;
+    const svgElement = tempDiv.querySelector('svg');
+    if (svgElement) {
+        svgElement.removeAttribute('width');
+        svgElement.removeAttribute('height');
+        svgElement.style.width = '100%';
+        svgElement.style.height = '100%';
+        svgElement.classList.add('lobster-hat-svg');
+        svgToUse = tempDiv.innerHTML;
+    }
+
     container.innerHTML = svgToUse;
     
     const svg = container.querySelector('svg');
     if (svg) {
-        svg.removeAttribute('width');
-        svg.removeAttribute('height');
-        svg.classList.add('lobster-hat-svg');
         svg.style.color = getLobsterColor(count, pluginConfig.baseColor);
         let filters = ['drop-shadow(0px 3px 2px rgba(0,0,0,0.3))'];
         if (isTop1) filters.push('drop-shadow(0px 0px 8px rgba(255, 215, 0, 0.9))');
@@ -162,6 +178,7 @@ async function scanTweets() {
                     if (tweetId && !processedTweets.includes(tweetId)) {
                         counts[username] = (counts[username] || 0) + 1;
                         processedTweets.push(tweetId);
+                        // 数据清理：只保留最近 1000 条，防止本地存储过大
                         if (processedTweets.length > 1000) processedTweets.shift();
                         updated = true;
                     }
@@ -183,6 +200,17 @@ async function scanTweets() {
                     wearHat(avatarNode, counts[username], username === top1User);
                 }
             }
+        }
+    });
+
+    // 针对 X 某些特殊的 overflow 容器进行深度加固
+    document.querySelectorAll('[data-testid="tweet"] [data-testid="Tweet-User-Avatar"]').forEach(el => {
+        let parent = el.parentElement;
+        for(let i=0; i<5; i++) { // 向上查找5层
+            if(parent && (getComputedStyle(parent).overflow === 'hidden' || getComputedStyle(parent).overflowX === 'hidden')) {
+                parent.style.setProperty('overflow', 'visible', 'important');
+            }
+            parent = parent?.parentElement;
         }
     });
 
